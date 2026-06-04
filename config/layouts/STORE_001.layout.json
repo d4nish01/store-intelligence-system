@@ -1,0 +1,88 @@
+{
+  "_meta": {
+    "version": "1.1",
+    "owner": "AI-1 (structure). Polygon values must be calibrated by operator.",
+    "how_to_calibrate": "python tools/calibrate_zones.py --store-id STORE_001",
+    "coordinate_note": "All polygon and line coordinates are in VIDEO PIXEL SPACE for the camera specified in camera_id. Different cameras have independent coordinate spaces.",
+    "calibration_status": "TEMPLATE — all polygons are placeholders. Calibrate before running pipeline."
+  },
+
+  "store_id": "STORE_001",
+  "display_name": "Apex Retail — Store 001",
+
+  "open_time": "10:00",
+  "close_time": "22:00",
+
+  "coordinate_space": {
+    "width": 1920,
+    "height": 1080,
+    "source": "video_pixel_coordinates"
+  },
+
+  "zones": [
+    {
+      "_comment": "Entry area zone — covered by both entry cameras. Used for presence confirmation, not line crossing detection.",
+      "zone_id": "ENTRY_AREA",
+      "camera_id": "CAM_ENTRY_01",
+      "zone_type": "entry",
+      "polygon": [[100, 200], [900, 200], [900, 800], [100, 800]],
+      "sku_zone": null,
+      "_calibration_required": true
+    },
+    {
+      "_comment": "Billing zone — checkout counter and queue area. queue_depth is tracked here.",
+      "zone_id": "BILLING",
+      "camera_id": "CAM_BILLING_01",
+      "zone_type": "billing",
+      "polygon": [[200, 200], [1100, 200], [1100, 900], [200, 900]],
+      "sku_zone": "CHECKOUT",
+      "_calibration_required": true
+    },
+    {
+      "_comment": "Product Zone A — first product section on the main floor. Update zone_id and sku_zone to match store 001 layout.png.",
+      "zone_id": "PRODUCT_ZONE_A",
+      "camera_id": "CAM_ZONE_01",
+      "zone_type": "product",
+      "polygon": [[50, 100], [700, 100], [700, 700], [50, 700]],
+      "sku_zone": "PRODUCT_ZONE_A",
+      "_calibration_required": true
+    },
+    {
+      "_comment": "Product Zone B — second product section on the main floor.",
+      "zone_id": "PRODUCT_ZONE_B",
+      "camera_id": "CAM_ZONE_01",
+      "zone_type": "product",
+      "polygon": [[750, 100], [1400, 100], [1400, 700], [750, 700]],
+      "sku_zone": "PRODUCT_ZONE_B",
+      "_calibration_required": true
+    }
+  ],
+
+  "entry_lines": [
+    {
+      "_comment": "Primary entry line on CAM_ENTRY_01. Crossing this line determines ENTRY vs EXIT direction. This camera is the authoritative source per CONTRACT.md §13.",
+      "camera_id": "CAM_ENTRY_01",
+      "line_id": "ENTRY_LINE_PRIMARY",
+      "points": [[100, 500], [900, 500]],
+      "inbound_direction": "bottom_to_top",
+      "_direction_note": "inbound_direction is the direction a person moves when ENTERING the store. bottom_to_top means crossing from y > 500 to y < 500 is an ENTRY. The reverse is an EXIT.",
+      "_calibration_required": true
+    },
+    {
+      "_comment": "Secondary entry line on CAM_ENTRY_02. Used for confirmation and deduplication only (CONTRACT.md §13). Not authoritative.",
+      "camera_id": "CAM_ENTRY_02",
+      "line_id": "ENTRY_LINE_SECONDARY",
+      "points": [[100, 500], [900, 500]],
+      "inbound_direction": "bottom_to_top",
+      "_calibration_required": true
+    }
+  ],
+
+  "camera_coverage": {
+    "_comment": "Maps each camera_id to the zone_ids it can observe. Pipeline uses this to route zone containment checks to the correct camera.",
+    "CAM_ENTRY_01": ["ENTRY_AREA"],
+    "CAM_ENTRY_02": ["ENTRY_AREA"],
+    "CAM_BILLING_01": ["BILLING"],
+    "CAM_ZONE_01": ["PRODUCT_ZONE_A", "PRODUCT_ZONE_B"]
+  }
+}

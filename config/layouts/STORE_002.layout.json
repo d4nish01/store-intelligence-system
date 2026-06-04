@@ -1,0 +1,98 @@
+{
+  "_meta": {
+    "version": "1.1",
+    "owner": "AI-1 (structure). Polygon values must be calibrated by operator.",
+    "how_to_calibrate": "python tools/calibrate_zones.py --store-id STORE_002",
+    "coordinate_note": "All polygon and line coordinates are in VIDEO PIXEL SPACE for the camera specified in camera_id. Different cameras have independent coordinate spaces.",
+    "calibration_status": "TEMPLATE — all polygons are placeholders. Calibrate before running pipeline.",
+    "zone_note": "Zone IDs and sku_zone labels (SKINCARE, HAIRCARE, FRAGRANCES) are illustrative examples based on a typical beauty retail layout. Update to match the actual Store 002 layout.png before running the pipeline."
+  },
+
+  "store_id": "STORE_002",
+  "display_name": "Apex Retail — Store 002",
+
+  "open_time": "10:00",
+  "close_time": "22:00",
+
+  "coordinate_space": {
+    "width": 1920,
+    "height": 1080,
+    "source": "video_pixel_coordinates"
+  },
+
+  "zones": [
+    {
+      "_comment": "Entry area zone — covered by both entry cameras.",
+      "zone_id": "ENTRY_AREA",
+      "camera_id": "CAM_ENTRY_01",
+      "zone_type": "entry",
+      "polygon": [[120, 180], [920, 180], [920, 820], [120, 820]],
+      "sku_zone": null,
+      "_calibration_required": true
+    },
+    {
+      "_comment": "Billing zone — checkout counter and queue area for Store 002.",
+      "zone_id": "BILLING",
+      "camera_id": "CAM_BILLING_01",
+      "zone_type": "billing",
+      "polygon": [[150, 150], [1050, 150], [1050, 850], [150, 850]],
+      "sku_zone": "CHECKOUT",
+      "_calibration_required": true
+    },
+    {
+      "_comment": "Skincare product zone. Update zone_id and sku_zone to match actual Store 002 layout.png.",
+      "zone_id": "SKINCARE",
+      "camera_id": "CAM_ZONE_01",
+      "zone_type": "product",
+      "polygon": [[60, 120], [680, 120], [680, 680], [60, 680]],
+      "sku_zone": "SKINCARE",
+      "_calibration_required": true
+    },
+    {
+      "_comment": "Haircare product zone.",
+      "zone_id": "HAIRCARE",
+      "camera_id": "CAM_ZONE_01",
+      "zone_type": "product",
+      "polygon": [[720, 120], [1380, 120], [1380, 680], [720, 680]],
+      "sku_zone": "HAIRCARE",
+      "_calibration_required": true
+    },
+    {
+      "_comment": "Fragrances product zone — third section. Add or remove zones to match the actual store layout.",
+      "zone_id": "FRAGRANCES",
+      "camera_id": "CAM_ZONE_01",
+      "zone_type": "product",
+      "polygon": [[60, 720], [680, 720], [680, 1020], [60, 1020]],
+      "sku_zone": "FRAGRANCES",
+      "_calibration_required": true
+    }
+  ],
+
+  "entry_lines": [
+    {
+      "_comment": "Primary entry line on CAM_ENTRY_01. Authoritative source for ENTRY/EXIT (CONTRACT.md §13).",
+      "camera_id": "CAM_ENTRY_01",
+      "line_id": "ENTRY_LINE_PRIMARY",
+      "points": [[120, 480], [920, 480]],
+      "inbound_direction": "bottom_to_top",
+      "_direction_note": "Crossing from y > 480 to y < 480 is an ENTRY. The reverse is an EXIT.",
+      "_calibration_required": true
+    },
+    {
+      "_comment": "Secondary entry line on CAM_ENTRY_02. Confirmation and deduplication only (CONTRACT.md §13).",
+      "camera_id": "CAM_ENTRY_02",
+      "line_id": "ENTRY_LINE_SECONDARY",
+      "points": [[120, 480], [920, 480]],
+      "inbound_direction": "bottom_to_top",
+      "_calibration_required": true
+    }
+  ],
+
+  "camera_coverage": {
+    "_comment": "Maps each camera_id to the zone_ids it can observe. Update after calibration to reflect actual camera fields of view.",
+    "CAM_ENTRY_01": ["ENTRY_AREA"],
+    "CAM_ENTRY_02": ["ENTRY_AREA"],
+    "CAM_BILLING_01": ["BILLING"],
+    "CAM_ZONE_01": ["SKINCARE", "HAIRCARE", "FRAGRANCES"]
+  }
+}

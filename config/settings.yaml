@@ -1,0 +1,95 @@
+# config/settings.yaml
+# Store Intelligence System — System-Wide Settings
+#
+# Global defaults for ingestion, session handling, POS correlation,
+# anomaly detection, detection thresholds, and API configuration.
+# Store-specific overrides are defined in config/stores.yaml.
+#
+# These are global defaults that apply to every store.
+# Per-store overrides for timing windows go in config/stores.yaml.
+#
+# CRITICAL: All code must read thresholds from this file at runtime.
+# Do NOT duplicate these values as Python constants or hardcoded defaults.
+# Do NOT duplicate them as environment variables in .env.
+#
+# Loading pattern:
+#   import yaml
+#   with open("config/settings.yaml") as f:
+#       settings = yaml.safe_load(f)
+#   max_batch = settings["ingestion"]["max_batch_size"]
+
+# ── Ingestion ─────────────────────────────────────────────────────────────────
+ingestion:
+  # Maximum events accepted in a single POST /events/ingest request body
+  max_batch_size: 500
+
+# ── Session Logic ─────────────────────────────────────────────────────────────
+session:
+  # Minutes of inactivity after EXIT before re-entry is treated as a new visitor.
+  # Per-store override available via config/stores.yaml → reentry_window_minutes
+  reentry_window_minutes: 30
+
+  # Emit a ZONE_DWELL event every N seconds of continuous zone presence.
+  # Pipeline (AI-3) reads this value from here — do not hardcode in detect.py.
+  dwell_emit_interval_seconds: 30
+
+# ── Entry Camera Deduplication ────────────────────────────────────────────────
+deduplication:
+  # If entry_exit_primary and entry_exit_secondary both detect the same crossing
+  # direction within this window, merge into one event (CONTRACT.md §13).
+  # Per-store override available via config/stores.yaml → dedup_window_seconds
+  entry_camera_window_seconds: 4
+
+# ── POS Correlation ────────────────────────────────────────────────────────────
+pos:
+  # A billing zone event within this many minutes before a POS transaction
+  # marks the session as converted (CONTRACT.md §9).
+  # Per-store override available via config/stores.yaml → billing_pos_window_minutes
+  billing_correlation_window_minutes: 5
+
+# ── Anomaly Thresholds ────────────────────────────────────────────────────────
+anomalies:
+  # BILLING_QUEUE_SPIKE: trigger WARN anomaly when queue_depth exceeds this value
+  queue_spike_depth: 5
+
+  # STALE_FEED: trigger WARN anomaly when no events ingested for this many minutes
+  # Per-store override available via config/stores.yaml → stale_feed_minutes
+  stale_feed_minutes: 10
+
+  # DEAD_ZONE: trigger INFO anomaly when a product zone has no events for this long
+  dead_zone_minutes: 30
+
+  # CONVERSION_DROP: trigger CRITICAL anomaly when conversion rate drops by this
+  # fraction compared to the prior same-length window (e.g. 0.30 = 30% drop)
+  conversion_drop_threshold: 0.30
+
+  # Heatmap data_confidence is set to "LOW" when fewer than this many customer
+  # sessions visited the zone
+  heatmap_low_confidence_sessions: 20
+
+# ── Detection Pipeline Settings (AI-3) ───────────────────────────────────────
+detection:
+  # Minimum bounding box confidence from the detector to process the track.
+  # Events below this threshold are still emitted with the real confidence value
+  # (not dropped) when preserve_low_confidence_events is true.
+  min_person_confidence: 0.25
+
+  # When true: events below min_person_confidence are emitted and stored.
+  # Metric queries filter them out at query time, not at ingest time.
+  # When false: events below threshold are silently dropped (not recommended).
+  preserve_low_confidence_events: true
+
+  # Role strings used to identify camera types from config/stores.yaml.
+  # These must match the role values in stores.yaml exactly.
+  primary_entry_role:   "entry_exit_primary"
+  secondary_entry_role: "entry_exit_secondary"
+  billing_role:         "billing"
+  zone_role:            "main_floor_zone"
+
+# ── API Settings ──────────────────────────────────────────────────────────────
+api:
+  # Allowed CORS origins for the dashboard frontend.
+  # AI-4 may extend this list if the dashboard is served on a different port.
+  cors_origins:
+    - "http://localhost:8000"
+    - "http://localhost:3000"

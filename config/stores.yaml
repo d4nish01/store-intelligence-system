@@ -1,0 +1,141 @@
+# config/stores.yaml
+# Store Intelligence System — Per-Store Configuration
+#
+# This file defines store-specific camera mapping, raw input paths, layout files,
+# timing windows, and operational thresholds.
+#
+# ─── HOW TO ADD A NEW STORE ───────────────────────────────────────────────────
+#   1. Add a new block under `stores:` below.
+#   2. Create config/layouts/{STORE_ID}.layout.json.
+#   3. Place videos in data/raw/{store_id_lowercase}/.
+#   4. Add POS rows for the new store_id to data/pos_transactions.csv.
+#   5. Run the calibration tool if zone polygons need adjustment.
+#   6. No application-code changes are required.
+#
+# ─── CAMERA ROLES ─────────────────────────────────────────────────────────────
+#   entry_exit_primary    entry 1.mp4       Authoritative ENTRY/EXIT source
+#   entry_exit_secondary  entry 2.mp4       Confirmation camera; deduplicated against primary
+#   billing               billing_area.mp4  Queue depth and billing-zone events
+#   main_floor_zone       zone.mp4          Product-zone enter/exit/dwell events
+#
+# ─── LOADING PATTERN ──────────────────────────────────────────────────────────
+#   import yaml
+#   with open("config/stores.yaml") as f:
+#       stores = yaml.safe_load(f)["stores"]
+#   store_cfg = stores[store_id]
+#   layout_path = store_cfg["layout_file"]
+
+stores:
+
+  STORE_001:
+    display_name: "Apex Retail — Store 001"
+
+    # Directory containing the raw CCTV video files for this store
+    raw_dir: "data/raw/store_001"
+
+    # Layout file path
+    layout_file: "config/layouts/STORE_001.layout.json"
+
+    timezone: "Asia/Kolkata"
+
+    # Seconds within which primary and secondary entry camera detections
+    # are merged into one event.
+    dedup_window_seconds: 4
+
+    # Minutes of inactivity after EXIT before the visitor is treated as a
+    # new unique visitor on re-entry.
+    reentry_window_minutes: 30
+
+    # Minutes before a POS transaction that a billing-zone event can be
+    # correlated as a conversion.
+    billing_pos_window_minutes: 5
+
+    # Minutes of no ingested events before feed_status becomes STALE_FEED.
+    stale_feed_minutes: 10
+
+    # Camera definitions. Camera IDs should match camera coverage in layout JSON.
+    cameras:
+      CAM_ENTRY_01:
+        filename: "entry 1.mp4"
+        role: "entry_exit_primary"
+        description: "Primary entry/exit camera — authoritative source for ENTRY and EXIT events"
+
+      CAM_ENTRY_02:
+        filename: "entry 2.mp4"
+        role: "entry_exit_secondary"
+        description: "Secondary entry/exit camera — confirmation only; deduplicated against CAM_ENTRY_01 within dedup_window_seconds"
+
+      CAM_BILLING_01:
+        filename: "billing_area.mp4"
+        role: "billing"
+        description: "Billing counter and queue area camera"
+
+      CAM_ZONE_01:
+        filename: "zone.mp4"
+        role: "main_floor_zone"
+        description: "Main product-zone and floor camera"
+
+  STORE_002:
+    display_name: "Apex Retail — Store 002"
+
+    raw_dir: "data/raw/store_002"
+    layout_file: "config/layouts/STORE_002.layout.json"
+    timezone: "Asia/Kolkata"
+
+    dedup_window_seconds: 4
+    reentry_window_minutes: 30
+    billing_pos_window_minutes: 5
+    stale_feed_minutes: 10
+
+    cameras:
+      CAM_ENTRY_01:
+        filename: "entry 1.mp4"
+        role: "entry_exit_primary"
+        description: "Primary entry/exit camera — authoritative source for ENTRY and EXIT events"
+
+      CAM_ENTRY_02:
+        filename: "entry 2.mp4"
+        role: "entry_exit_secondary"
+        description: "Secondary entry/exit camera — confirmation only; deduplicated against CAM_ENTRY_01 within dedup_window_seconds"
+
+      CAM_BILLING_01:
+        filename: "billing_area.mp4"
+        role: "billing"
+        description: "Billing counter and queue area camera"
+
+      CAM_ZONE_01:
+        filename: "zone.mp4"
+        role: "main_floor_zone"
+        description: "Main product-zone and floor camera"
+
+# ─── TEMPLATE FOR FUTURE STORES ───────────────────────────────────────────────
+# To add STORE_003, uncomment and complete this block.
+# Then create config/layouts/STORE_003.layout.json from the STORE_001 template.
+# No Python code changes are needed.
+#
+#  STORE_003:
+#    display_name: "Apex Retail — Store 003"
+#    raw_dir: "data/raw/store_003"
+#    layout_file: "config/layouts/STORE_003.layout.json"
+#    timezone: "Asia/Kolkata"
+#    dedup_window_seconds: 4
+#    reentry_window_minutes: 30
+#    billing_pos_window_minutes: 5
+#    stale_feed_minutes: 10
+#    cameras:
+#      CAM_ENTRY_01:
+#        filename: "entry 1.mp4"
+#        role: "entry_exit_primary"
+#        description: ""
+#      CAM_ENTRY_02:
+#        filename: "entry 2.mp4"
+#        role: "entry_exit_secondary"
+#        description: ""
+#      CAM_BILLING_01:
+#        filename: "billing_area.mp4"
+#        role: "billing"
+#        description: ""
+#      CAM_ZONE_01:
+#        filename: "zone.mp4"
+#        role: "main_floor_zone"
+#        description: ""

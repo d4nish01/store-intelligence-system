@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Runtime database
+store_intelligence.db
+data/store_intelligence.db
+*.db
+
+# Large raw CCTV files
+data/raw/**/*.mp4
+data/raw/**/*.mov
+data/raw/**/*.avi
+data/raw/**/*.mkv
+
+# Model weights
+*.pt
+*.onnx
+
+# Generated event outputs
+output/events/*.jsonl
+
+# OS/editor
+.DS_Store
+.vscode/
+
+# SQLite runtime sidecar files
+*.db-shm
+*.db-wal
